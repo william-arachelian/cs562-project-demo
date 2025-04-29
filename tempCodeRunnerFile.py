@@ -1,0 +1,2 @@
+phi = inputHandler()
+print(phi)
