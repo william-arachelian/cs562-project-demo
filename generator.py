@@ -28,12 +28,13 @@ from dotenv import load_dotenv
 def query():
     load_dotenv()
 
-    user = os.getenv('USER')
-    password = os.getenv('PASSWORD')
-    dbname = os.getenv('DBNAME')
+    user = os.getenv('DB_USER')
+    password = os.getenv('DB_PASSWORD')
+    dbname = os.getenv('DB_NAME')
 
-    conn = psycopg2.connect("dbname="+dbname+" user="+user+" password="+password,
-                            cursor_factory=psycopg2.extras.DictCursor)
+    conn = psycopg2.connect(
+    dbname=dbname, user=user, password=password, host="localhost", port=5433, cursor_factory=psycopg2.extras.DictCursor)
+    
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
