@@ -68,6 +68,7 @@ def inputHandler():
                 'g': str
             }
     """
+
     choice = 'invalid'
     while choice == 'invalid':
         choice = input("How would you like to handle input?\n\t[f]: file input\n\t[m]: manual input\n")
@@ -90,3 +91,81 @@ def inputHandler():
         phi['g'] = input("HAVING_CONDITION(G) [list]: ")
 
         return phi
+
+def createMFStructEntry(phi, row):
+    """
+    Creates a new MF_Struct row (dict) initialized with grouping attributes and default aggregate values.
+
+    Args:
+        phi (dict): The parsed phi operator input.
+        row (dict): The current database row being processed.
+
+    Returns:
+        dict: Initialized entry for MF_Struct.
+    """
+    entry = {}
+
+    for attr in phi['v']:
+        entry[attr] = row[attr]
+
+    for s in phi['s']:
+        if s in phi['v']: 
+            continue
+
+        _gv, agg, attr = s.split('_')
+        if agg == 'count':
+            entry[s] = 0
+        elif agg in ('sum', 'avg'):
+            entry[s] = 0
+        elif agg == 'max':
+            entry[s] = float('-inf')
+        elif agg == 'min':
+            entry[s] = float('inf')
+        else:
+            entry[s] = None
+
+    return entry
+
+
+
+def lookup(MF_Struct, grouping_attrs, grouping_key):
+    """
+    Finds the index of the entry in mf_struct that matches the given grouping key.
+
+    Args:
+        MF_Struct (list[dict]): The MF_Struct list of grouping entries.
+        grouping_attrs (list[str]): List of grouping attribute names (phi['v']).
+        grouping_key (tuple): Tuple of grouping attribute values.
+
+    Returns:
+        int: Index of the matching entry if found, else -1.
+    """
+
+    for i, entry in enumerate(MF_Struct):
+        if all(entry[attr] == val for attr, val in zip(grouping_attrs, grouping_key)):
+            return i
+    return -1
+
+def generateBody():
+    body = """
+    phi = inputHandler()
+
+    MF_Struct = []
+
+    for row in cur:
+        #create a tuple of current rows grouping attribute values
+        grouping_key = tuple(row[attr] for attr in phi['v'])
+
+        #search MF_Struct to see if grouping_key already exists
+        search = lookup(MF_Struct, phi['v'], grouping_key)
+
+        if search == -1:
+            new_entry = createMFStructEntry(phi, row)
+            MF_Struct.append(new_entry)
+            
+        
+        #[TODO: if already in MF_Struct, update aggregate function]
+    print(MF_Struct)
+    """
+
+    return body
