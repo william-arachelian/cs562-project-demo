@@ -112,14 +112,14 @@ def createMFStructEntry(phi, row):
         if s in phi['v']: 
             continue
 
-        _gv, func, attr = s.split('_')
-        if func == 'count':
+        _gv, agg, attr = s.split('_')
+        if agg == 'count':
             entry[s] = 0
-        elif func in ('sum', 'avg'):
+        elif agg in ('sum', 'avg'):
             entry[s] = 0
-        elif func == 'max':
+        elif agg == 'max':
             entry[s] = float('-inf')
-        elif func == 'min':
+        elif agg == 'min':
             entry[s] = float('inf')
         else:
             entry[s] = None

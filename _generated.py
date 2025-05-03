@@ -36,8 +36,9 @@ def query():
         if search == -1:
             new_entry = createMFStructEntry(phi, row)
             MF_Struct.append(new_entry)
-            # _global.append(row)
+            
         
+        #[TODO: if already in MF_Struct, update aggregate function]
     print(MF_Struct)
     
     
