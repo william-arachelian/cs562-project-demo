@@ -31,14 +31,36 @@ def query():
         grouping_key = tuple(row[attr] for attr in phi['v'])
 
         #search MF_Struct to see if grouping_key already exists
-        search = lookup(MF_Struct, phi['v'], grouping_key)
+        search_index = lookup(MF_Struct, phi['v'], grouping_key)
 
-        if search == -1:
+        if search_index == -1:
             new_entry = createMFStructEntry(phi, row)
             MF_Struct.append(new_entry)
-            
-        
+
         #[TODO: if already in MF_Struct, update aggregate function]
+        else:
+            for s in phi['s']:
+                if s in phi['v']: 
+                    continue
+
+                gv, agg, attr = s.split('_')
+                if agg == 'count':
+                    MF_Struct[search_index][s] += 1
+                elif agg in ('sum'):
+                    MF_Struct[search_index][s] += row[attr]
+                elif agg in ('min'):
+                    MF_Struct[search_index][s] = min(MF_Struct[search_index][attr], row[attr])
+                elif agg in ('max'):
+                    MF_Struct[search_index][s] = max(MF_Struct[search_index][attr], row[attr])
+                #TODO: implement avg aggregate function
+                elif agg in ('avg'):
+                    MF_Struct[search_index][f"{gv}_sum_{attr}"] += row[attr]
+                    MF_Struct[search_index][f"{gv}_count_{attr}"] += 1
+                    MF_Struct[search_index][s] = MF_Struct[f"{gv}_sum_{attr}"] // MF_Struct[f"{gv}_count_{attr}"]
+
+                else:
+                    MF_Struct[search_index] = None
+
     print(MF_Struct)
     
     
