@@ -108,19 +108,16 @@ def createMFStructEntry(phi, row):
     for attr in phi['v']:
         entry[attr] = row[attr]
 
-    for s in phi['s']:
-        if s in phi['v']: 
-            continue
-
+    for s in phi['f']:
         gv, agg, attr = s.split('_')
         if agg == 'count':
             entry[s] = 1
         elif agg in ('sum', 'max', 'min'):
             entry[s] = row[attr]
         elif agg == 'avg':
-            if not entry[s]:
+            if f"{gv}_sum_{attr}" not in entry.keys():
                 entry[f"{gv}_sum_{attr}"] = row[attr]
-            if not entry[s]:
+            if f"{gv}_count_{attr}" not in entry.keys():
                 entry[f"{gv}_count_{attr}"] = 1
             
             entry[s] = entry[f"{gv}_sum_{attr}"] // entry[f"{gv}_count_{attr}"]
@@ -149,10 +146,6 @@ def lookup(MF_Struct, grouping_attrs, grouping_key):
 
 def generateBody():
     body = """
-    phi = inputHandler()
-
-    MF_Struct = []
-
     for row in cur:
         #create a tuple of current rows grouping attribute values
         grouping_key = tuple(row[attr] for attr in phi['v'])
@@ -160,34 +153,40 @@ def generateBody():
         #search MF_Struct to see if grouping_key already exists
         search_index = lookup(MF_Struct, phi['v'], grouping_key)
 
+        #if does not exist, create an entry in MF_Struct list
         if search_index == -1:
             new_entry = createMFStructEntry(phi, row)
             MF_Struct.append(new_entry)
 
-        #[TODO: if already in MF_Struct, update aggregate function]
+        #if already exists, update aggregates based on attribute values
         else:
-            for s in phi['s']:
-                if s in phi['v']: 
-                    continue
+            for s in phi['f']:
 
                 gv, agg, attr = s.split('_')
                 if agg == 'count':
                     MF_Struct[search_index][s] += 1
-                elif agg in ('sum'):
+                elif agg == 'sum':
                     MF_Struct[search_index][s] += row[attr]
-                elif agg in ('min'):
+                elif agg == 'min':
                     MF_Struct[search_index][s] = min(MF_Struct[search_index][attr], row[attr])
-                elif agg in ('max'):
+                elif agg == 'max':
                     MF_Struct[search_index][s] = max(MF_Struct[search_index][attr], row[attr])
-                #TODO: implement avg aggregate function
-                elif agg in ('avg'):
+                elif agg == 'avg':
                     MF_Struct[search_index][f"{gv}_sum_{attr}"] += row[attr]
                     MF_Struct[search_index][f"{gv}_count_{attr}"] += 1
-                    MF_Struct[search_index][s] = MF_Struct[f"{gv}_sum_{attr}"] // MF_Struct[f"{gv}_count_{attr}"]
-
+                    MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] // MF_Struct[search_index][f"{gv}_count_{attr}"]
                 else:
                     MF_Struct[search_index] = None
 
+    #TODO: filter based on SUCH THAT CLAUSE AND HAVING CLAUSE
+
+    #remove any attributes used for calculation and not in select clause
+    for entry in MF_Struct:
+        for key in list(entry.keys()):
+            if key not in phi['s']:
+                del entry[key]
+
+    
     print(MF_Struct)
     """
 
