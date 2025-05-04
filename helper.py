@@ -186,8 +186,6 @@ def generateBody():
             if key not in phi['s']:
                 del entry[key]
 
-    
-    print(MF_Struct)
     """
 
     return body
