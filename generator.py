@@ -31,10 +31,13 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-    _global = []
+    phi = inputHandler()
+
+    MF_Struct = []
+    
     {body}
     
-    return tabulate.tabulate(_global,
+    return tabulate.tabulate(MF_Struct,
                         headers="keys", tablefmt="psql")
 
 def main():

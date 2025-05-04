@@ -20,29 +20,56 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-    _global = []
-    
     phi = inputHandler()
 
     MF_Struct = []
-
+    
+    
     for row in cur:
         #create a tuple of current rows grouping attribute values
         grouping_key = tuple(row[attr] for attr in phi['v'])
 
         #search MF_Struct to see if grouping_key already exists
-        search = lookup(MF_Struct, phi['v'], grouping_key)
+        search_index = lookup(MF_Struct, phi['v'], grouping_key)
 
-        if search == -1:
+        #if does not exist, create an entry in MF_Struct list
+        if search_index == -1:
             new_entry = createMFStructEntry(phi, row)
             MF_Struct.append(new_entry)
-            
-        
-        #[TODO: if already in MF_Struct, update aggregate function]
+
+        #if already exists, update aggregates based on attribute values
+        else:
+            for s in phi['f']:
+
+                gv, agg, attr = s.split('_')
+                if agg == 'count':
+                    MF_Struct[search_index][s] += 1
+                elif agg == 'sum':
+                    MF_Struct[search_index][s] += row[attr]
+                elif agg == 'min':
+                    MF_Struct[search_index][s] = min(MF_Struct[search_index][attr], row[attr])
+                elif agg == 'max':
+                    MF_Struct[search_index][s] = max(MF_Struct[search_index][attr], row[attr])
+                elif agg == 'avg':
+                    MF_Struct[search_index][f"{gv}_sum_{attr}"] += row[attr]
+                    MF_Struct[search_index][f"{gv}_count_{attr}"] += 1
+                    MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] // MF_Struct[search_index][f"{gv}_count_{attr}"]
+                else:
+                    MF_Struct[search_index] = None
+
+    #TODO: filter based on SUCH THAT CLAUSE AND HAVING CLAUSE
+
+    #remove any attributes used for calculation and not in select clause
+    for entry in MF_Struct:
+        for key in list(entry.keys()):
+            if key not in phi['s']:
+                del entry[key]
+
+    
     print(MF_Struct)
     
     
-    return tabulate.tabulate(_global,
+    return tabulate.tabulate(MF_Struct,
                         headers="keys", tablefmt="psql")
 
 def main():
