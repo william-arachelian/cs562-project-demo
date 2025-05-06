@@ -20,7 +20,7 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-    phi = inputHandler()
+    phi = {'s': ['cust', '1_sum_quant', '2_avg_quant'], 'n': 2, 'v': ['cust'], 'f': ['1_sum_quant', '2_avg_quant'], 'g': '2_avg_quant > 500'}
 
     MF_Struct = []
     
@@ -53,20 +53,21 @@ def query():
                 elif agg == 'avg':
                     MF_Struct[search_index][f"{gv}_sum_{attr}"] += row[attr]
                     MF_Struct[search_index][f"{gv}_count_{attr}"] += 1
-                    MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] // MF_Struct[search_index][f"{gv}_count_{attr}"]
+                    MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] / MF_Struct[search_index][f"{gv}_count_{attr}"]
                 else:
                     MF_Struct[search_index] = None
 
     #TODO: filter based on SUCH THAT CLAUSE AND HAVING CLAUSE
 
+    
+    MF_Struct = [entry for entry in MF_Struct if entry['2_avg_quant'] > 500]
+    
     #remove any attributes used for calculation and not in select clause
     for entry in MF_Struct:
         for key in list(entry.keys()):
             if key not in phi['s']:
                 del entry[key]
-
     
-    print(MF_Struct)
     
     
     return tabulate.tabulate(MF_Struct,

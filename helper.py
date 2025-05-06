@@ -1,4 +1,5 @@
-def parseFileInput(file_path: str):
+import re
+def parseFileInput(file_path):
     """
     Parses a file containing phi operator input into a dictionary.
 
@@ -42,8 +43,8 @@ def parseFileInput(file_path: str):
             while i < len(contents) and contents[i] != 'HAVING_CONDITION(G):':
                 phi['sigma'].append(contents[i])
                 i += 1
+            continue
         elif line == 'HAVING_CONDITION(G):':
-            if i + 1 < len(contents):
                 phi['g'] = contents[i + 1]
                 i += 1
         i += 1
@@ -144,7 +145,61 @@ def lookup(MF_Struct, grouping_attrs, grouping_key):
             return i
     return -1
 
-def generateBody():
+import re
+
+import re
+
+def generateHavingClauseFilter(g):
+    """
+    Generates code for filtering MF_Struct based on HAVING clause.
+
+    Args:
+        g (str): Having Clause from phi operator
+
+    Returns:
+        str: Code to filter MF_Struct if g exists, else comment indicating that theres no HAVING clause.
+    """
+
+    if g is None:
+        return "# No HAVING clause"
+
+    # Compile regex patterns for reuse
+    logical_ops_pattern = re.compile(r'\b(and|or|not)\b', flags=re.IGNORECASE)
+    comparison_ops_pattern = re.compile(r'(==|!=|>=|<=|>|<)')
+
+    # Split and strip parts
+    parts = logical_ops_pattern.split(g)
+    parts = [p.strip() for p in parts if p.strip()]
+
+    rebuilt_clause = []
+
+    for element in parts:
+        # Check for logical operators using precompiled pattern
+        if logical_ops_pattern.fullmatch(element):
+            rebuilt_clause.append(element.lower())
+            continue
+
+        # Rewrite attributes with comparison ops
+        if comparison_ops_pattern.search(element):
+            tokens = re.findall(r'\b[\w]+(?:_[\w]+)+\b', element)
+            for token in set(tokens):
+                element = element.replace(token, f"entry['{token}']")
+        
+        rebuilt_clause.append(element)
+
+    clause_str = ' '.join(rebuilt_clause)
+
+    return f"""
+    #Filter MF_Struct by HAVING clause
+    MF_Struct = [entry for entry in MF_Struct if {clause_str}]
+    """
+
+
+def generateAggregateCalculation(f, sigma):
+    return 
+
+def generateBody(phi):
+    
     body = """
     for row in cur:
         #create a tuple of current rows grouping attribute values
@@ -174,18 +229,20 @@ def generateBody():
                 elif agg == 'avg':
                     MF_Struct[search_index][f"{gv}_sum_{attr}"] += row[attr]
                     MF_Struct[search_index][f"{gv}_count_{attr}"] += 1
-                    MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] // MF_Struct[search_index][f"{gv}_count_{attr}"]
+                    MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] / MF_Struct[search_index][f"{gv}_count_{attr}"]
                 else:
                     MF_Struct[search_index] = None
+    """
 
-    #TODO: filter based on SUCH THAT CLAUSE AND HAVING CLAUSE
-
+    cleanUp = """
     #remove any attributes used for calculation and not in select clause
     for entry in MF_Struct:
         for key in list(entry.keys()):
             if key not in phi['s']:
                 del entry[key]
-
+    
     """
 
-    return body
+    havingClause= generateHavingClauseFilter(phi['g']) if 'g' in phi.keys() else ""
+
+    return body + havingClause + cleanUp
