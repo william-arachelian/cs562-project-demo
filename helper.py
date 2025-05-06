@@ -1,4 +1,5 @@
 import re
+
 def parseFileInput(file_path):
     """
     Parses a file containing phi operator input into a dictionary.
@@ -121,7 +122,7 @@ def createMFStructEntry(phi, row):
             if f"{gv}_count_{attr}" not in entry.keys():
                 entry[f"{gv}_count_{attr}"] = 1
             
-            entry[s] = entry[f"{gv}_sum_{attr}"] // entry[f"{gv}_count_{attr}"]
+            entry[s] = entry[f"{gv}_sum_{attr}"] / entry[f"{gv}_count_{attr}"]
         else:
             entry[s] = None
 
