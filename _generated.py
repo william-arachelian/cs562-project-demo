@@ -56,10 +56,8 @@ def query():
                     MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] / MF_Struct[search_index][f"{gv}_count_{attr}"]
                 else:
                     MF_Struct[search_index] = None
-
-    #TODO: filter based on SUCH THAT CLAUSE AND HAVING CLAUSE
-
     
+    #Filter MF_Struct by HAVING clause
     MF_Struct = [entry for entry in MF_Struct if entry['2_avg_quant'] > 500]
     
     #remove any attributes used for calculation and not in select clause

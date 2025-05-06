@@ -146,10 +146,6 @@ def lookup(MF_Struct, grouping_attrs, grouping_key):
             return i
     return -1
 
-import re
-
-import re
-
 def generateHavingClauseFilter(g):
     """
     Generates code for filtering MF_Struct based on HAVING clause.
