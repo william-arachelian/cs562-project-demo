@@ -1,13 +1,13 @@
 import subprocess
-from helper import generateBody
+from helper import generateBody, inputHandler
 def main():
     """
     This is the generator code. It should take in the MF structure and generate the code
     needed to run the query. That generated code should be saved to a 
     file (e.g. _generated.py) and then run.
     """
-
-    body = generateBody()
+    phi = inputHandler()
+    body = generateBody(phi)
     
     tmp = f"""
 import os
@@ -31,7 +31,7 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-    phi = inputHandler()
+    phi = {phi}
 
     MF_Struct = []
     
