@@ -25,7 +25,6 @@ def query():
     phi = {'s': ['cust', '1_sum_quant', '2_sum_quant', '3_sum_quant'], 'n': 3, 'v': ['cust'], 'f': ['1_sum_quant', '1_avg_quant', '2_sum_quant', '3_sum_quant', '3_avg_quant'], 'sigma': ["1.state='NY'", "2.state='NJ'", "3.state='CT'"], 'g': '1_sum_quant > 2 * 2_sum_quant or 1_avg_quant > 3_avg_quant'}
 
     original_sigma_list = phi['sigma']
-
     phi['sigma'] = defaultdict(list)
     for cond in original_sigma_list:
         gv, condition = cond.split('.', 1)

@@ -36,7 +36,6 @@ def query():
     phi = {phi}
 
     original_sigma_list = phi['sigma']
-
     phi['sigma'] = defaultdict(list)
     for cond in original_sigma_list:
         gv, condition = cond.split('.', 1)
