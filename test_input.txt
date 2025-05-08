@@ -12,3 +12,13 @@ SELECT CONDITION-VECT([σ]):
 3.state=’CT’
 HAVING_CONDITION(G):
 1_sum_quant > 2 * 2_sum_quant or 1_avg_quant > 3_avg_quant
+cust, sum_quant, x_max_quant
+NUMBER OF GROUPING VARIABLES(n):
+1
+GROUPING ATTRIBUTES(V):
+cust
+F-VECT([F]):
+sum_quant, x_max_quant
+HAVING_CONDITION(G):
+sum_quant > 500
+>>>>>>> Stashed changes

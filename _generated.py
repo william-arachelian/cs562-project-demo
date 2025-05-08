@@ -20,37 +20,54 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
+<<<<<<< Updated upstream
     phi = inputHandler()
+=======
+    phi = {'s': ['cust', 'sum_quant', 'x_max_quant'], 'n': 1, 'v': ['cust'], 'f': ['sum_quant', 'x_max_quant'], 'g': 'sum_quant > 500'}
+>>>>>>> Stashed changes
 
     MF_Struct = []
     
     
     for row in cur:
-        #create a tuple of current rows grouping attribute values
+        # create a tuple of current row's grouping attribute values
         grouping_key = tuple(row[attr] for attr in phi['v'])
 
-        #search MF_Struct to see if grouping_key already exists
+        # search MF_Struct to see if grouping_key already exists
         search_index = lookup(MF_Struct, phi['v'], grouping_key)
 
-        #if does not exist, create an entry in MF_Struct list
+        # if it does not exist, create an entry in MF_Struct list
         if search_index == -1:
             new_entry = createMFStructEntry(phi, row)
             MF_Struct.append(new_entry)
 
-        #if already exists, update aggregates based on attribute values
+        # if it already exists, update aggregates based on attribute values
         else:
             for s in phi['f']:
+                parts = s.split('_')
 
-                gv, agg, attr = s.split('_')
+                if len(parts) == 3:
+                    gv, agg, attr = parts
+                elif len(parts) == 2:
+                    gv = ''
+                    agg, attr = parts
+                else:
+                    raise ValueError(f"Unexpected aggregate format: {s}")
+
                 if agg == 'count':
                     MF_Struct[search_index][s] += 1
+
                 elif agg == 'sum':
                     MF_Struct[search_index][s] += row[attr]
+
                 elif agg == 'min':
-                    MF_Struct[search_index][s] = min(MF_Struct[search_index][attr], row[attr])
+                    MF_Struct[search_index][s] = min(MF_Struct[search_index][s], row[attr])
+
                 elif agg == 'max':
-                    MF_Struct[search_index][s] = max(MF_Struct[search_index][attr], row[attr])
+                    MF_Struct[search_index][s] = max(MF_Struct[search_index][s], row[attr])
+
                 elif agg == 'avg':
+<<<<<<< Updated upstream
                     MF_Struct[search_index][f"{gv}_sum_{attr}"] += row[attr]
                     MF_Struct[search_index][f"{gv}_count_{attr}"] += 1
                     MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] // MF_Struct[search_index][f"{gv}_count_{attr}"]
@@ -60,6 +77,22 @@ def query():
     #TODO: filter based on SUCH THAT CLAUSE AND HAVING CLAUSE
 
     #remove any attributes used for calculation and not in select clause
+=======
+                    sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
+                    count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
+
+                    MF_Struct[search_index][sum_key] += row[attr]
+                    MF_Struct[search_index][count_key] += 1
+                    MF_Struct[search_index][s] = MF_Struct[search_index][sum_key] / MF_Struct[search_index][count_key]
+
+                else:
+                    MF_Struct[search_index][s] = None
+    
+    #Filter MF_Struct by HAVING clause
+    MF_Struct = [entry for entry in MF_Struct if entry['sum_quant'] > 500]
+    
+    # remove any attributes used for calculation and not in select clause
+>>>>>>> Stashed changes
     for entry in MF_Struct:
         for key in list(entry.keys()):
             if key not in phi['s']:
@@ -67,7 +100,6 @@ def query():
 
     
     print(MF_Struct)
-    
     
     return tabulate.tabulate(MF_Struct,
                         headers="keys", tablefmt="psql")
