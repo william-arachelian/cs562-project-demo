@@ -19,8 +19,8 @@ def query():
     
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
-    
-    phi = {'s': ['cust', 'sum_quant', 'x_max_quant'], 'n': 1, 'v': ['cust'], 'f': ['sum_quant', 'x_max_quant']}
+
+    phi = {'s': ['cust', '1_sum_quant', '2_avg_quant'], 'n': 2, 'v': ['cust'], 'f': ['1_sum_quant', '2_avg_quant'], 'g': '2_avg_quant > 500'}
 
     MF_Struct = []
     
@@ -63,6 +63,7 @@ def query():
                     MF_Struct[search_index][s] = max(MF_Struct[search_index][s], row[attr])
 
                 elif agg == 'avg':
+
                     sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
                     count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
 
@@ -72,6 +73,9 @@ def query():
 
                 else:
                     MF_Struct[search_index] = None
+    
+    #Filter MF_Struct by HAVING clause
+    MF_Struct = [entry for entry in MF_Struct if entry['2_avg_quant'] > 500]
     
     #remove any attributes used for calculation and not in select clause
     for entry in MF_Struct:

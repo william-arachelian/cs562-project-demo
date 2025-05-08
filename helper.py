@@ -1,5 +1,6 @@
 import re
-def parseFileInput(file_path: str):
+
+def parseFileInput(file_path):
     """
     Parses a file containing phi operator input into a dictionary.
 
@@ -43,8 +44,8 @@ def parseFileInput(file_path: str):
             while i < len(contents) and contents[i] != 'HAVING_CONDITION(G):':
                 phi['sigma'].append(contents[i])
                 i += 1
+            continue
         elif line == 'HAVING_CONDITION(G):':
-            if i + 1 < len(contents):
                 phi['g'] = contents[i + 1]
                 i += 1
         i += 1
@@ -243,6 +244,7 @@ def generateBody(phi):
                     MF_Struct[search_index][s] = max(MF_Struct[search_index][s], row[attr])
 
                 elif agg == 'avg':
+
                     sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
                     count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
 
