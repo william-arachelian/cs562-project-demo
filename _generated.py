@@ -20,11 +20,7 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-<<<<<<< Updated upstream
-    phi = inputHandler()
-=======
-    phi = {'s': ['cust', 'sum_quant', 'x_max_quant'], 'n': 1, 'v': ['cust'], 'f': ['sum_quant', 'x_max_quant'], 'g': 'sum_quant > 500'}
->>>>>>> Stashed changes
+    phi = {'s': ['cust', 'sum_quant', 'x_max_quant'], 'n': 1, 'v': ['cust'], 'f': ['sum_quant', 'x_max_quant']}
 
     MF_Struct = []
     
@@ -67,17 +63,6 @@ def query():
                     MF_Struct[search_index][s] = max(MF_Struct[search_index][s], row[attr])
 
                 elif agg == 'avg':
-<<<<<<< Updated upstream
-                    MF_Struct[search_index][f"{gv}_sum_{attr}"] += row[attr]
-                    MF_Struct[search_index][f"{gv}_count_{attr}"] += 1
-                    MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] // MF_Struct[search_index][f"{gv}_count_{attr}"]
-                else:
-                    MF_Struct[search_index] = None
-
-    #TODO: filter based on SUCH THAT CLAUSE AND HAVING CLAUSE
-
-    #remove any attributes used for calculation and not in select clause
-=======
                     sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
                     count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
 
@@ -86,20 +71,15 @@ def query():
                     MF_Struct[search_index][s] = MF_Struct[search_index][sum_key] / MF_Struct[search_index][count_key]
 
                 else:
-                    MF_Struct[search_index][s] = None
+                    MF_Struct[search_index] = None
     
-    #Filter MF_Struct by HAVING clause
-    MF_Struct = [entry for entry in MF_Struct if entry['sum_quant'] > 500]
-    
-    # remove any attributes used for calculation and not in select clause
->>>>>>> Stashed changes
+    #remove any attributes used for calculation and not in select clause
     for entry in MF_Struct:
         for key in list(entry.keys()):
             if key not in phi['s']:
                 del entry[key]
-
     
-    print(MF_Struct)
+    
     
     return tabulate.tabulate(MF_Struct,
                         headers="keys", tablefmt="psql")

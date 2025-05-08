@@ -1,3 +1,4 @@
+import re
 def parseFileInput(file_path: str):
     """
     Parses a file containing phi operator input into a dictionary.
@@ -118,8 +119,6 @@ def createMFStructEntry(phi, row):
             gv = ''
             agg, attr = parts
         
-            
-
         if agg == 'count':
             entry[s] = 1
         elif agg in ('sum', 'max', 'min'):
