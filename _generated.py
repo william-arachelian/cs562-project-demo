@@ -22,14 +22,15 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-    phi = {'s': ['cust', '1_sum_quant', '2_sum_quant', '3_sum_quant'], 'n': 3, 'v': ['cust'], 'f': ['1_sum_quant', '1_avg_quant', '2_sum_quant', '3_sum_quant', '3_avg_quant'], 'sigma': ["1.state='NY'", "2.state='NJ'", "3.state='CT'"], 'g': '1_sum_quant > 2 * 2_sum_quant or 1_avg_quant > 3_avg_quant'}
+    phi = {'s': ['cust', 'max_quant'], 'n': 0, 'v': ['cust'], 'f': ['max_quant']}
 
-    original_sigma_list = phi['sigma']
-    phi['sigma'] = defaultdict(list)
-    for cond in original_sigma_list:
-        gv, condition = cond.split('.', 1)
-        condition = condition.replace('=', '==') if '==' not in condition else condition
-        phi['sigma'][gv].append(condition)
+    if 'sigma' in phi.keys():
+        original_sigma_list = phi['sigma']
+        phi['sigma'] = defaultdict(list)
+        for cond in original_sigma_list:
+            gv, condition = cond.split('.', 1)
+            condition = condition.replace('=', '==') if '==' not in condition else condition
+            phi['sigma'][gv].append(condition)
 
     print(phi)
 
@@ -89,9 +90,6 @@ def query():
 
                 else:
                     MF_Struct[search_index] = None
-    
-    #Filter MF_Struct by HAVING clause
-    MF_Struct = [entry for entry in MF_Struct if entry['1_sum_quant'] > 2 * entry['2_sum_quant'] or entry['1_avg_quant'] > entry['3_avg_quant']]
     
     #remove any attributes used for calculation and not in select clause
     for entry in MF_Struct:

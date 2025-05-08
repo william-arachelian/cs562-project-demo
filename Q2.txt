@@ -1,0 +1,8 @@
+SELECT ATTRIBUTE(S):
+cust, max_quant
+NUMBER OF GROUPING VARIABLES(n):
+0
+GROUPING ATTRIBUTES(V):
+cust
+F-VECT([F]):
+max_quant

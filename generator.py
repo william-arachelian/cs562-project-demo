@@ -35,12 +35,13 @@ def query():
     
     phi = {phi}
 
-    original_sigma_list = phi['sigma']
-    phi['sigma'] = defaultdict(list)
-    for cond in original_sigma_list:
-        gv, condition = cond.split('.', 1)
-        condition = condition.replace('=', '==') if '==' not in condition else condition
-        phi['sigma'][gv].append(condition)
+    if 'sigma' in phi.keys():
+        original_sigma_list = phi['sigma']
+        phi['sigma'] = defaultdict(list)
+        for cond in original_sigma_list:
+            gv, condition = cond.split('.', 1)
+            condition = condition.replace('=', '==') if '==' not in condition else condition
+            phi['sigma'][gv].append(condition)
 
     print(phi)
 
