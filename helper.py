@@ -106,7 +106,7 @@ def createMFStructEntry(phi, row):
         dict: Initialized entry for MF_Struct.
     """
     entry = {}
-
+     
     for attr in phi['v']:
         entry[attr] = row[attr]
     
@@ -119,6 +119,22 @@ def createMFStructEntry(phi, row):
             gv = ''
             agg, attr = parts
 
+        #check condition on group variable
+
+        if gv and not eval(phi['sigma'][gv][0], {}, row):
+            if agg in ('sum', 'count'):
+                entry[s] = 0
+            elif agg == 'avg':
+                sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
+                count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
+                entry[sum_key] = 0
+                entry[count_key] = 0
+                entry[s] = 0
+            else:
+                entry[s] = None
+
+            continue
+
         if agg == 'count':
             entry[s] = 1
         elif agg in ('sum', 'max', 'min'):
@@ -126,10 +142,12 @@ def createMFStructEntry(phi, row):
         elif agg == 'avg':
             sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
             count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
-            if sum_key not in entry:
+
+            if sum_key not in phi['f']:
                 entry[sum_key] = row[attr]
-            if count_key not in entry:
+            if count_key not in phi['f']:
                 entry[count_key] = 1
+
             entry[s] = entry[sum_key] / entry[count_key]
         else:
             entry[s] = None
@@ -210,6 +228,7 @@ def generateBody(phi):
 
         # if it does not exist, create an entry in MF_Struct list
         if search_index == -1:
+          
             new_entry = createMFStructEntry(phi, row)
             MF_Struct.append(new_entry)
 

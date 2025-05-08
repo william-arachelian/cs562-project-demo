@@ -60,6 +60,7 @@ def query():
 
         # if it does not exist, create an entry in MF_Struct list
         if search_index == -1:
+          
             new_entry = createMFStructEntry(phi, row)
             MF_Struct.append(new_entry)
 
