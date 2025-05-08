@@ -111,18 +111,27 @@ def createMFStructEntry(phi, row):
         entry[attr] = row[attr]
 
     for s in phi['f']:
-        gv, agg, attr = s.split('_')
+        parts = s.split('_')
+
+        # Support both 'x_sum_quant' and 'sum_quant'
+        if len(parts) == 3:
+            gv, agg, attr = parts
+        elif len(parts) == 2:
+            gv = ''
+            agg, attr = parts
+        
         if agg == 'count':
             entry[s] = 1
         elif agg in ('sum', 'max', 'min'):
             entry[s] = row[attr]
         elif agg == 'avg':
-            if f"{gv}_sum_{attr}" not in entry.keys():
-                entry[f"{gv}_sum_{attr}"] = row[attr]
-            if f"{gv}_count_{attr}" not in entry.keys():
-                entry[f"{gv}_count_{attr}"] = 1
-            
-            entry[s] = entry[f"{gv}_sum_{attr}"] / entry[f"{gv}_count_{attr}"]
+            sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
+            count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
+            if sum_key not in entry:
+                entry[sum_key] = row[attr]
+            if count_key not in entry:
+                entry[count_key] = 1
+            entry[s] = entry[sum_key] / entry[count_key]
         else:
             entry[s] = None
 
@@ -196,37 +205,53 @@ def generateAggregateCalculation(f, sigma):
     return 
 
 def generateBody(phi):
-    
     body = """
     for row in cur:
-        #create a tuple of current rows grouping attribute values
+        # create a tuple of current row's grouping attribute values
         grouping_key = tuple(row[attr] for attr in phi['v'])
 
-        #search MF_Struct to see if grouping_key already exists
+        # search MF_Struct to see if grouping_key already exists
         search_index = lookup(MF_Struct, phi['v'], grouping_key)
 
-        #if does not exist, create an entry in MF_Struct list
+        # if it does not exist, create an entry in MF_Struct list
         if search_index == -1:
             new_entry = createMFStructEntry(phi, row)
             MF_Struct.append(new_entry)
 
-        #if already exists, update aggregates based on attribute values
+        # if it already exists, update aggregates based on attribute values
         else:
             for s in phi['f']:
+                parts = s.split('_')
 
-                gv, agg, attr = s.split('_')
+                if len(parts) == 3:
+                    gv, agg, attr = parts
+                elif len(parts) == 2:
+                    gv = ''
+                    agg, attr = parts
+                else:
+                    raise ValueError(f"Unexpected aggregate format: {s}")
+
                 if agg == 'count':
                     MF_Struct[search_index][s] += 1
+
                 elif agg == 'sum':
                     MF_Struct[search_index][s] += row[attr]
+
                 elif agg == 'min':
-                    MF_Struct[search_index][s] = min(MF_Struct[search_index][attr], row[attr])
+                    MF_Struct[search_index][s] = min(MF_Struct[search_index][s], row[attr])
+
                 elif agg == 'max':
-                    MF_Struct[search_index][s] = max(MF_Struct[search_index][attr], row[attr])
+                    MF_Struct[search_index][s] = max(MF_Struct[search_index][s], row[attr])
+
                 elif agg == 'avg':
-                    MF_Struct[search_index][f"{gv}_sum_{attr}"] += row[attr]
-                    MF_Struct[search_index][f"{gv}_count_{attr}"] += 1
-                    MF_Struct[search_index][s] = MF_Struct[search_index][f"{gv}_sum_{attr}"] / MF_Struct[search_index][f"{gv}_count_{attr}"]
+
+                    sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
+                    count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
+
+                    MF_Struct[search_index][sum_key] += row[attr]
+                    MF_Struct[search_index][count_key] += 1
+                    MF_Struct[search_index][s] = MF_Struct[search_index][sum_key] / MF_Struct[search_index][count_key]
+
                 else:
                     MF_Struct[search_index] = None
     """
