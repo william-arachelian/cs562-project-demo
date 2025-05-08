@@ -1,6 +1,8 @@
 #William Arachelian and Marcus Hom
 #I pledge my honor that I have abided by the stevens honor sytem
 
+# To install dependencies: pip install -r requirements.txt
+
 import subprocess
 from helper import generateBody, inputHandler
 def main():
@@ -39,6 +41,7 @@ def query():
     
     phi = {phi}
 
+    # convert phi from list to dictionary with keys as gv for simpler condition checking
     if 'sigma' in phi.keys():
         original_sigma_list = phi['sigma']
         phi['sigma'] = defaultdict(list)
@@ -48,7 +51,6 @@ def query():
             # Remove all gv prefixes like "1." → "cust", "quant"
             expr = re.sub(r'(?<!\w)(\d+)\.', '', expr)
 
-            print(expr)
             # Normalize single '=' to '==', but don't change >=, <=, !=, ==
             expr = re.sub(r'(?<![<>=!])=(?![=])', '==', expr)
 
@@ -57,8 +59,6 @@ def query():
 
             # Append cleaned expression
             phi['sigma'][gv].append(expr.strip())
-
-    #print(phi)
 
     MF_Struct = []
     

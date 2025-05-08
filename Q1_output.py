@@ -1,3 +1,18 @@
+""" Console Output
++--------+-------------+---------------+-------------+-------------+-------------+
+| cust   |   sum_quant |   count_quant |   avg_quant |   min_quant |   max_quant |
+|--------+-------------+---------------+-------------+-------------+-------------|
+| Dan    |      578913 |          1139 |     508.264 |           1 |        1000 |
+| Claire |      546718 |          1084 |     504.352 |           4 |        1000 |
+| Chae   |      549046 |          1097 |     500.498 |           1 |         999 |
+| Mia    |      555611 |          1110 |     500.55  |           1 |         999 |
+| Sam    |      569440 |          1114 |     511.167 |           1 |        1000 |
+| Wally  |      574887 |          1110 |     517.916 |           1 |        1000 |
+| Helen  |      555765 |          1106 |     502.5   |           1 |        1000 |
+| Emily  |      529730 |          1123 |     471.71  |           2 |         999 |
+| Boo    |      544544 |          1117 |     487.506 |           1 |        1000 |
++--------+-------------+---------------+-------------+-------------+-------------+
+"""
 
 import os
 import psycopg2
@@ -23,7 +38,7 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-    phi = {'s': ['cust', 'prod', '1_min_quant', '2_max_quant', '3_avg_quant'], 'n': 3, 'v': ['cust', 'prod'], 'f': ['1_min_quant', '2_max_quant', '3_avg_quant'], 'sigma': ["1.state='NJ' and 1.quant > 200", "2.state='NY' and 2.quant > 200", "3.state='CT' and 3.quant > 200"]}
+    phi = {'s': ['cust', 'sum_quant', 'count_quant', 'avg_quant', 'min_quant', 'max_quant'], 'n': 0, 'v': ['cust'], 'f': ['sum_quant', 'count_quant', 'avg_quant', 'min_quant', 'max_quant']}
 
     # convert phi from list to dictionary with keys as gv for simpler condition checking
     if 'sigma' in phi.keys():

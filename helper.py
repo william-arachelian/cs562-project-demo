@@ -224,6 +224,17 @@ def generateHavingClauseFilter(g):
     """
 
 def generateBody(phi):
+    """
+    Generates algorithm code for iterating over database and filling in MF_Struct entries
+
+    Args:
+        phi (dict): phi operator
+
+    Returns:
+        str: Algorithm code 
+    """
+
+
     body = """
     for row in cur:
         # create a tuple of current row's grouping attribute values

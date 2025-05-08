@@ -1,3 +1,14 @@
+""" Console Output
++--------+---------------+---------------+
+|   year |   1_sum_quant |   2_max_quant |
+|--------+---------------+---------------|
+|   2016 |        264817 |           962 |
+|   2017 |        225712 |           980 |
+|   2018 |        264965 |           951 |
+|   2020 |        264467 |           910 |
+|   2019 |        245730 |           969 |
++--------+---------------+---------------+
+"""
 
 import os
 import psycopg2
@@ -23,7 +34,7 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-    phi = {'s': ['cust', 'prod', '1_min_quant', '2_max_quant', '3_avg_quant'], 'n': 3, 'v': ['cust', 'prod'], 'f': ['1_min_quant', '2_max_quant', '3_avg_quant'], 'sigma': ["1.state='NJ' and 1.quant > 200", "2.state='NY' and 2.quant > 200", "3.state='CT' and 3.quant > 200"]}
+    phi = {'s': ['year', '1_sum_quant', '2_max_quant'], 'n': 2, 'v': ['year'], 'f': ['1_sum_quant', '2_max_quant'], 'sigma': ["1.state = 'NJ'", "2.state = 'PA' and 2.month = 6"], 'g': '1_sum_quant > 1000'}
 
     # convert phi from list to dictionary with keys as gv for simpler condition checking
     if 'sigma' in phi.keys():
@@ -104,6 +115,9 @@ def query():
 
                 else:
                     MF_Struct[search_index] = None
+    
+    #Filter MF_Struct by HAVING clause
+    MF_Struct = [entry for entry in MF_Struct if entry['1_sum_quant'] > 1000]
     
     #remove any attributes used for calculation and not in select clause
     for entry in MF_Struct:
