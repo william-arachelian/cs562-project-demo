@@ -197,7 +197,6 @@ def generateHavingClauseFilter(g):
     logical_ops_pattern = re.compile(r'\b(and|or|not)\b', flags=re.IGNORECASE)
     comparison_ops_pattern = re.compile(r'(==|!=|>=|<=|>|<)')
 
-    # Split and strip parts
     parts = logical_ops_pattern.split(g)
     parts = [p.strip() for p in parts if p.strip()]
 
