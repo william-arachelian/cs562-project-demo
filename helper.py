@@ -200,10 +200,6 @@ def generateHavingClauseFilter(g):
     MF_Struct = [entry for entry in MF_Struct if {clause_str}]
     """
 
-
-def generateAggregateCalculation(f, sigma):
-    return 
-
 def generateBody(phi):
     body = """
     for row in cur:
@@ -230,7 +226,12 @@ def generateBody(phi):
                     agg, attr = parts
                 else:
                     raise ValueError(f"Unexpected aggregate format: {s}")
-
+                
+                if gv in phi.get('sigma', {}):
+                    conditions = phi['sigma'][gv]
+                    if not all(eval(cond, {}, row) for cond in conditions):
+                        continue  # Skip update if condition not met
+        
                 if agg == 'count':
                     MF_Struct[search_index][s] += 1
 
