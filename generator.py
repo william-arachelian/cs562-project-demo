@@ -55,7 +55,7 @@ def query():
             # Append cleaned expression
             phi['sigma'][gv].append(expr.strip())
 
-    print(phi)
+    #print(phi)
 
     MF_Struct = []
     
