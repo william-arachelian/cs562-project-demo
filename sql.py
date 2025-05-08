@@ -19,7 +19,7 @@ def query():
     dbname=dbname, user=user, password=password, host="localhost", port=5433, cursor_factory=psycopg2.extras.DictCursor)
     
     cur = conn.cursor()
-    cur.execute("SELECT cust, sum(quant), avg(quant) FROM sales GROUP BY cust HAVING avg(quant) > 500")
+    cur.execute("SELECT cust, max(quant) FROM sales GROUP BY cust")
 
     return tabulate.tabulate(cur.fetchall(),
                              headers="keys", tablefmt="psql")

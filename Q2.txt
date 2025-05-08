@@ -1,10 +1,8 @@
 SELECT ATTRIBUTE(S):
-cust, sum_quant, x_max_quant
+cust, max_quant
 NUMBER OF GROUPING VARIABLES(n):
-1
+0
 GROUPING ATTRIBUTES(V):
 cust
 F-VECT([F]):
-sum_quant, x_max_quant
-HAVING_CONDITION(G):
-x_max_quant > 500
+max_quant
