@@ -1,3 +1,6 @@
+#William Arachelian and Marcus Hom
+#I pledge my honor that I have abided by the stevens honor sytem
+
 import re
 
 def parseFileInput(file_path):
