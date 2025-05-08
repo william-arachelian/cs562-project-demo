@@ -109,17 +109,16 @@ def createMFStructEntry(phi, row):
 
     for attr in phi['v']:
         entry[attr] = row[attr]
-
+    
     for s in phi['f']:
         parts = s.split('_')
 
-        # Support both 'x_sum_quant' and 'sum_quant'
         if len(parts) == 3:
             gv, agg, attr = parts
         elif len(parts) == 2:
             gv = ''
             agg, attr = parts
-        
+
         if agg == 'count':
             entry[s] = 1
         elif agg in ('sum', 'max', 'min'):
@@ -249,8 +248,11 @@ def generateBody(phi):
                     sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
                     count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"
 
-                    MF_Struct[search_index][sum_key] += row[attr]
-                    MF_Struct[search_index][count_key] += 1
+                    if sum_key not in phi['f']:
+                        MF_Struct[search_index][sum_key] += row[attr]
+                    if count_key not in phi['f']:
+                        MF_Struct[search_index][count_key] += 1
+
                     MF_Struct[search_index][s] = MF_Struct[search_index][sum_key] / MF_Struct[search_index][count_key]
 
                 else:

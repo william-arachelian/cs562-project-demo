@@ -1,8 +1,13 @@
 SELECT ATTRIBUTE(S):
-cust, max_quant
+prod, state, 1_sum_quant, 2_avg_quant, 3_sum_quant
 NUMBER OF GROUPING VARIABLES(n):
-0
+3
 GROUPING ATTRIBUTES(V):
-cust
+prod, state
 F-VECT([F]):
-max_quant
+1_sum_quant, 2_avg_quant, 3_sum_quant
+SELECT CONDITION-VECT([σ]):
+1.month = 6
+2.year = 2018
+3.month = 7
+
