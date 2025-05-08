@@ -1,12 +1,8 @@
 SELECT ATTRIBUTE(S):
-cust, 1_sum_quant
+cust, sum_quant, count_quant, avg_quant, min_quant, max_quant
 NUMBER OF GROUPING VARIABLES(n):
-1
+0
 GROUPING ATTRIBUTES(V):
 cust
 F-VECT([F]):
-1_sum_quant, 1_avg_quant, 2_sum_quant, 3_sum_quant, 3_avg_quant
-SELECT CONDITION-VECT([σ]):
-1.state='NY'
-HAVING_CONDITION(G):
-1_sum_quant > 2 * 2_sum_quant or 1_avg_quant > 3_avg_quant
+sum_quant, count_quant, avg_quant, min_quant, max_quant

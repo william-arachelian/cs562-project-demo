@@ -10,4 +10,3 @@ SELECT CONDITION-VECT([σ]):
 1.month = 6
 2.year = 2018
 3.month = 7
-

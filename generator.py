@@ -39,23 +39,21 @@ def query():
     if 'sigma' in phi.keys():
         original_sigma_list = phi['sigma']
         phi['sigma'] = defaultdict(list)
-        
+
         for cond in original_sigma_list:
-            # Match "gv.condition", e.g., "1.cust == cust AND quant > 10"
             gv, expr = cond.split('.', 1)
-            
-            # Split on case-insensitive "AND" using regex
-            sub_conditions = re.split(r'\bAND\b', expr, flags=re.IGNORECASE)
-            
-            for sub_cond in sub_conditions:
-                sub_cond = sub_cond.strip()
+            # Remove all gv prefixes like "1." → "cust", "quant"
+            expr = re.sub(r'(?<!\w)(\d+)\.', '', expr)
 
-                # Normalize single '=' to '=='
-                if '=' in sub_cond and '==' not in sub_cond and '!=' not in sub_cond:
-                    sub_cond = sub_cond.replace('=', '==')
+            print(expr)
+            # Normalize single '=' to '==', but don't change >=, <=, !=, ==
+            expr = re.sub(r'(?<![<>=!])=(?![=])', '==', expr)
 
-                phi['sigma'][gv].append(sub_cond)
+            # Lowercase all standalone ANDs
+            expr = re.sub(r'\bAND\b', 'and', expr, flags=re.IGNORECASE)
 
+            # Append cleaned expression
+            phi['sigma'][gv].append(expr.strip())
 
     print(phi)
 

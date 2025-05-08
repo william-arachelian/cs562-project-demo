@@ -124,6 +124,10 @@ def createMFStructEntry(phi, row):
         if gv and not eval(phi['sigma'][gv][0], {}, row):
             if agg in ('sum', 'count'):
                 entry[s] = 0
+            elif agg == 'min':
+                entry[s] = 2**31 - 1 
+            elif agg == 'max':
+                entry[s] = -2**31
             elif agg == 'avg':
                 sum_key = f"{gv}_sum_{attr}" if gv else f"sum_{attr}"
                 count_key = f"{gv}_count_{attr}" if gv else f"count_{attr}"

@@ -23,28 +23,26 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
-    phi = {'s': ['prod', 'state', '1_sum_quant', '2_avg_quant', '3_sum_quant'], 'n': 3, 'v': ['prod', 'state'], 'f': ['1_sum_quant', '2_avg_quant', '3_sum_quant'], 'sigma': ['1.month = 6', '2.year = 2018', '3.month = 7']}
+    phi = {'s': ['cust', 'prod', '1_min_quant', '2_max_quant', '3_avg_quant'], 'n': 3, 'v': ['cust', 'prod'], 'f': ['1_min_quant', '2_max_quant', '3_avg_quant'], 'sigma': ["1.state='NJ' and 1.quant > 200", "2.state='NY' and 2.quant > 200", "3.state='CT' and 3.quant > 200"]}
 
     if 'sigma' in phi.keys():
         original_sigma_list = phi['sigma']
         phi['sigma'] = defaultdict(list)
-        
+
         for cond in original_sigma_list:
-            # Match "gv.condition", e.g., "1.cust == cust AND quant > 10"
             gv, expr = cond.split('.', 1)
-            
-            # Split on case-insensitive "AND" using regex
-            sub_conditions = re.split(r'AND', expr, flags=re.IGNORECASE)
-            
-            for sub_cond in sub_conditions:
-                sub_cond = sub_cond.strip()
+            # Remove all gv prefixes like "1." → "cust", "quant"
+            expr = re.sub(r'(?<!\w)(\d+)\.', '', expr)
 
-                # Normalize single '=' to '=='
-                if '=' in sub_cond and '==' not in sub_cond and '!=' not in sub_cond:
-                    sub_cond = sub_cond.replace('=', '==')
+            print(expr)
+            # Normalize single '=' to '==', but don't change >=, <=, !=, ==
+            expr = re.sub(r'(?<![<>=!])=(?![=])', '==', expr)
 
-                phi['sigma'][gv].append(sub_cond)
+            # Lowercase all standalone ANDs
+            expr = re.sub(r'AND', 'and', expr, flags=re.IGNORECASE)
 
+            # Append cleaned expression
+            phi['sigma'][gv].append(expr.strip())
 
     print(phi)
 
